@@ -68,20 +68,21 @@ regd_users.post("/login", (req, res) => {
 
 // Task 8: Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
-    const isbn = req.params.isbn;
-    let filtered_book = books[isbn]
-    if (filtered_book) {
-        let review = req.query.review;
-        let reviewer = req.session.authorization['username'];
-        if(review) {
-            filtered_book['reviews'][reviewer] = review;
-            books[isbn] = filtered_book;
-        }
-        res.send(`The review for the book with ISBN  ${isbn} has been added/updated.`);
+const isbn = req.params.isbn;
+let filtered_book = books[isbn]
+if (filtered_book) {
+    let review = req.query.review;
+    let reviewer = req.session.authorization['username'];
+    if(review) {
+        filtered_book['reviews'][reviewer] = review;
+        books[isbn] = filtered_book;
     }
-    else{
-        res.send("Unable to find this ISBN!");
-    }
+    res.send(`The review for the book with ISBN  ${isbn} has been added/updated.`);
+}
+else{
+    res.send("Unable to find this ISBN!");
+}
+return res.status(300).json({message: "Yet to be implemented"});
 });
 
 // Task 9: Delete a book review
