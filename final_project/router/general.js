@@ -8,16 +8,18 @@ const public_users = express.Router();
 public_users.post("/register", (req,res) => {
     const username = req.body.username;
     const password = req.body.password;
-  
     if (username && password) {
-      if (!isValid(username)) { 
-        users.push({"username":username,"password":password});
-        return res.status(200).json({message: "User successfully registered, you can now login."});
-      } else {
-        return res.status(404).json({message: "User already exists, please try a different username."});    
-      }
-    } 
-    return res.status(404).json({message: "Registration errror ocurred, please try again."});
+        if (!isValid(username)) {
+            users.push({"username":username,"password":password});
+            return res.status(200).json({message:`User ${username} registered successfully! You can now login.`});
+        }
+        else {
+            return res.status(400).json({message:`User ${username} already exists!`});
+        }
+    }
+    else {
+        return res.status(404).json({message: "Unable to register user."});
+    }
 });
 
 // Task 1 - Get the book list available in the shop
@@ -28,41 +30,36 @@ public_users.get('/',function (req, res) {
 
 // Task 2 - Get book details based on ISBN
 public_users.get('/isbn/:isbn',function (req, res) {
-  const isbn = req.params.isbn;
-  return res.send(JSON.stringify(books[isbn],null,4))
- });
+    const isbn = req.params.isbn;
+    res.send(books[isbn]);
+});
 
 
 // Task 3 - Get book details based on author
 public_users.get('/author/:author', function (req, res) {
-  const author = req.params.author;
-  let bookDetails = Object.keys(books)
-  let book = "No books by the author have been found."
-  keys.forEach((key) => {
-    if (books[key].author === author) {
-      book = books[key];
-    }
-  })
-  return res.status(200).json({book});});
+    const authors = req.params.author;
+    const bookDetails = Object.values(books);
+    const book = bookDetails.filter((book) => book.author === authors);
+    res.status(200).json(book);
+});
 
 // Task 4 - Get all books based on title
 public_users.get('/title/:title',function (req, res) {
-  let title = req.params.title
-  let keys = Object.keys(books)
-  let book = "No books by the author have been found."
-  keys.forEach((key) => {
-    if (books[key].title === title) {
-      book = books[key]
-    }
-  })
-  return res.send(book);
+    const title = req.params.title;
+    const bookDetails = Object.values(books);
+    const book = bookDetails.filter((book) => book.title === title);
+    res.status(200).json(book);
 });
 
 
 // Task 5 - Get book review
 public_users.get('/review/:isbn',function (req, res) {
     const isbn = req.params.isbn;
-    res.send(books[isbn].reviews)
+    if (!books[isbn]) {
+        return res.status(404).json({ message: "Book not found" });
+    }
+    const reviews = books[isbn].reviews;
+    return res.status(200).json({ reviews: reviews });
 });
 
 // Task 10 
