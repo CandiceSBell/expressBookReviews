@@ -11,128 +11,63 @@ public_users.post("/register", (req,res) => {
     if (username && password) {
         if (!isValid(username)) {
             users.push({"username":username,"password":password});
-            return res.status(200).json({message:`User ${username} registered successfully! You can now login.`});
+            return res.status(200).json({message:`User ${username} registered successfully!`});
         }
         else {
-            return res.status(400).json({message:`User ${username} already exists!`});
+            return res.status(400).json({Error:`User ${username} already exists!`});
         }
     }
     else {
-        return res.status(404).json({message: "Unable to register user."});
+        return res.status(404).json({ Error: "Unable to register user."});
     }
 });
 
-// Task 1 - Get the book list available in the shop
-// public_users.get('/',function (req, res) {
-//    res.send(JSON.stringify(books, null, 4));
-// });
-
-// Get the book list available in the shop
-public_users.get("/", async function (req, res) {
-    try {
-      const result = JSON.stringify(books, null, 4);
-      res.send(result);
-    } catch (error) {
-      res.send(`An error ocurred ${error.message}`);
-    }
+// Task 1: Get the book list available in the shop
+public_users.get('/',function (req, res) {
+    res.status(200).json({books});
 });
-
 
 // Task 2 - Get book details based on ISBN
-// public_users.get('/isbn/:isbn',function (req, res) {
-//    const isbn = req.params.isbn;
-//   res.send(books[isbn]);
-// });
-
-// Get book details based on ISBN
-public_users.get("/isbn/:isbn", async function (req, res) {
-    // Retrieve the ISBN parameter from the request URL and send the corresponding Book's details
+public_users.get('/isbn/:isbn',function (req, res) {
     const isbn = req.params.isbn;
-    const book = await books[isbn];
-  
-    if (isbn in books) {
-      res.send(book);
+    if (books[isbn]) {
+       res.json(books[isbn]);
     } else {
-      res.status(404).json(`The isbn ${isbn} does not exist`);
+       res.status(404).json({Error: "Book not found"});
     }
-  });
-
+});
 
 // Task 3 - Get book details based on author
-// public_users.get('/author/:author', function (req, res) {
-//    const authors = req.params.author;
-//    const bookDetails = Object.values(books);
-//    const book = bookDetails.filter((book) => book.author === authors);
-//    res.status(200).json(book);
-// });
-
-// Get book details based on author
-public_users.get("/author/:author", async function (req, res) {
-    // Retrieve the author parameter from the request URL and send the corresponding Book's details
+public_users.get('/author/:author',function (req, res) {
     const author = req.params.author;
-    const arrayBooks = Object.values(books);
-    const findAuthor = arrayBooks.filter(
-      (book) => book.author.toLocaleLowerCase() === author.toLocaleLowerCase()
-    );
-  
-    if (findAuthor.length > 0) {
-      res.send(findAuthor);
+    const filteredBooks = Object.values(books).filter(book => book.author === author);
+    if(filteredBooks.length > 0) {
+        return res.status(200).json({BookByAuthor: filteredBooks});
     } else {
-      res.status(404).json(`The author '${author}' does not exist`);
+        return res.status(404).json({Error: "No book found"});
     }
-  });
-
+});
 
 // Task 4 - Get all books based on title
-// public_users.get('/title/:title',function (req, res) {
-//    const title = req.params.title;
-//    const bookDetails = Object.values(books);
-//    const book = bookDetails.filter((book) => book.title === title);
-//    res.status(200).json(book);
-// });
-
-// Get all books based on title
-public_users.get("/title/:title", async function (req, res) {
-    // Retrieve the title parameter from the request URL and send the corresponding Book's details
+public_users.get('/title/:title',function (req, res) {
     const title = req.params.title;
-    const arrayBooks = Object.values(books);
-    const findTitle = arrayBooks.filter(
-      (book) => book.title.toLocaleLowerCase() === title.toLocaleLowerCase()
-    );
-  
-    if (findTitle.length > 0) {
-      res.send(findTitle);
+    const filteredTitleBooks = Object.values(books).filter(book => book.title === title);  
+    if (filteredTitleBooks.length > 0) {
+        return res.status(200).json({BooksByTitle: filteredTitleBooks});
     } else {
-      res.status(404).json(`The title '${title}' does not exist`);
+        return res.status(404).json({Error: "No book found"});
     }
-  });
-
+});
 
 // Task 5 - Get book review
-// public_users.get('/review/:isbn',function (req, res) {
-//    const isbn = req.params.isbn;
-//    if (!books[isbn]) {
-//        return res.status(404).json({ message: "Book not found" });
-//    }
-//   const reviews = books[isbn].reviews;
-//    return res.status(200).json({ reviews: reviews });
-// });
-
-//  Get book review
-public_users.get("/review/:isbn", function (req, res) {
-    // Retrieve the ISBN parameter from the request URL and send the corresponding Book's review
-    const isbn = req.params.isbn;
-    const book = books[isbn];
-  
-    if (isbn in books) {
-      if (book.reviews.length > 0) {
-        res.send(book);
-      } else {
-        res.status(404).send(`The book ${book.title} has no reviews`);
-      }
-    } else {
-      res.status(404).json({ message: `The isbn ${isbn} not exist` });
-    }
-  });
+public_users.get('/review/:isbn',function (req, res) {
+  let isbn = req.params.isbn;
+  const book = books[isbn];
+  if (book && book.reviews) {
+    return res.status(200).json(book.reviews)
+  } else {
+    return res.status(404).json({message: "No reviews found for this book"});
+  }
+});
 
 module.exports.general = public_users;
